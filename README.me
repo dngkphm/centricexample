@@ -1,0 +1,37 @@
+--SET UP--
+Using eclipse, import project by going to selecting "import" then "maven projects" and going to the project directory. With the folder selected, import the project. Go to Project>Properties at the top toolbar to configure the run time settings. Head down to the Java Build Path and make sure that the JRE and Maven dependencies are checked. This application is running Java8, so you must locate and link JDK8. This will allow the code to run as an Java Application. Once check, apply and close to save the settings. You can now run the application by pressing the green play button on top (or select "Centric" in the drop down menu on the play button).
+
+If using IntelliJ, choose "import maven project" then locate the project directory. You will need to find the correct java build (JDK-8) and dependencies before finally importing the project. 
+
+This project uses in-memory database H2, so no MySql setup is necessary (although it was originally setup). To access the H2, database, visit localhost:8080/h2-console/ with user:"centric" pass:"". Here you can click on the tables to view its content. DISCLAIMER: in the products table, there is a tag column that holds null values. This is baked into JPA's system of configuring tables to fit the Product class (which has a Tags attribute). I could not figure out how to omit without ridding JPA/Spring boot entirely, as I had already forgone its built-in controller interface methods.
+
+
+--TESTING--
+I really couldn't figure out how to design JUnit tests for API calls, so I relied on POSTMAN to run through my test. Tips on setting up POSTMAN can be found here: https://www.postman.com/.
+Here are some test cases I ran:
+
+-LANDING PAGE-
+/v1/products: returns all the products in the database
+/v1/products/: does the same as above (All other API's with an addt'l "/" will do the same result
+/products: pulls up the h2 database with the products table entries
+
+-SEARCH-
+/v1/products/category: 404
+/v1/products/category/apparel: will return the list of products with the category = "apparel", pagesize and page number are defaulted to 5 items per page, at page 0.
+/v1/products/category/{any thing else}: will try to find products whose category is = "anything else". Otherwise it will return an empty list
+/v1/products/category/{type}?page=0: will return the /{type} result with page size 5
+/v1/products/category/{type}?page=1: will return nothing if there < 5 items in the database
+/v1/products/category/{type}?size=3: will return the /{type} result with page size 3 at page 1
+/v1/products/category/{type}?page=1&size=3: will return the /{type} result with page size 3, at page 2, showing less items if there < 3 items to show at page 2
+/v1/products/category/{type}?page=-1&size=0: will return the default size and page index of the /{type} result
+/v1/products/category/{type}?page=haha&size=#&*SD: 404
+
+-INSERT-
+Missing attributes from the JSON class should default to an empty string as null values are not allowed in the database, except id and created_at, which are generated during creation. For example:
+{
+"description": "Red hugo boss shirt",
+"brand": "Hugo Boss",
+"tags": [],
+"category": "apparel"
+}
+name = "", for this example.
